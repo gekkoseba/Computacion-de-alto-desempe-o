@@ -14,19 +14,16 @@ float* CPUEuler(float t_0, float y_0, float delta_t){
 	}
 	return y;
 }
-/*float* CPUEuler2(float t_0, float y_0, float delta_t){
-	int n=10/delta_t;
-	float y[n];
-	y[0]=y_0;
-	for (int i=1;i<n;i++){
-		float t_i=t_0+i*delta_t;
-		y[i]=y[i-1]+delta_t*(9*pow(t_i,2)-4*t_i+5);
+float CPUEuler2(int m, float* y_i, float delta_t,float t_i ){
+	float n=1/delta_t;
+	for (int i=1;i<m;i++){
+		y_i[i]=y_i[i]+delta_t*(4*t_i-y_i[i]+3+i);
 	}
-	return y;
 }
-*/
 
 int main(){ 
+
+	/*printf("seccion 1.a\n");
 	clock_t start, end;
 	for(int i=1;i<7;i++){
 		float delta_t=pow(10,-i);
@@ -36,10 +33,28 @@ int main(){
 		double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 		printf("%f\n",cpu_time_used);
 	}
+	*/
 	
-	/*for (int i=0;i<10/0.1;i++){
-		printf("%f ",CPUEuler(0,4,0.1)[i]);
+	printf("seccion 2.a\n");
+	int m=pow(10,4);
+	float y[m];
+	for(int i=0;i<m;i++){
+		y[i]=i;
+ 	}
+	//clock_t start, end;
+	//start=clock();
+	float n=pow(10,3);
+	for (int i=0;i<n;i++){
+		float t_i=i/n;
+		CPUEuler2(4,y,1/n,t_i);
+		printf("%f\n",y[100]);
 	}
-	return 0; */
+	
+	//end=clock();
+	//double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	//printf("%f\n",cpu_time_used);
+	
+
+	return 0; 
 } 
 
