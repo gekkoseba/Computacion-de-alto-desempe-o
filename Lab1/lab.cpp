@@ -36,25 +36,23 @@ int main(){
 	*/
 	
 	printf("seccion 2.a\n");
-	int m=pow(10,4);
-	float y[m];
-	for(int i=0;i<m;i++){
-		y[i]=i;
- 	}
-	//clock_t start, end;
-	//start=clock();
-	float n=pow(10,3);
-	for (int i=0;i<n;i++){
-		float t_i=i/n;
-		CPUEuler2(4,y,1/n,t_i);
-		printf("%f\n",y[100]);
+	for (int j=4;j<9;j++){
+		int m=pow(10,j);
+		float y[m];
+		for(int i=0;i<m;i++){
+			y[i]=i;
+	 	}
+		clock_t start, end;
+		start=clock();
+		float n=pow(10,3);
+		for (int i=0;i<n;i++){
+			float t_i=i/n;
+			CPUEuler2(m,y,1/n,t_i);
+		}
+		end=clock();
+		double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+		printf("%f\n",cpu_time_used);
 	}
-	
-	//end=clock();
-	//double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-	//printf("%f\n",cpu_time_used);
-	
-
 	return 0; 
 } 
 
