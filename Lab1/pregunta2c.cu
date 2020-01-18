@@ -20,16 +20,15 @@ int main(int argc, char** argv) {
 	printf("seccion 2.c\n");
 	for (int j=8;j<9;j++){
 		int m=pow(10,j);
-		hst_y2c = (float*) malloc(sizeof(float)*m+1);
-		cudaMalloc((void**) &dev_e2c,(m+1)*sizeof(float));
-		for(int i=0;i<m+1;i++){
-			hst_y2c[i]=i;
-	 	}
-	 	printf("%f y %f\n",hst_y2c[0],hst_y2c[m] );
 
 
 	 	for(int w= 0; w<4;w++){
-			bloque2c[w] = ceil((float) (m+1) /hilos2c[w]);
+	 		hst_y2c = (float*) malloc(sizeof(float)*m+1);
+			cudaMalloc((void**) &dev_e2c,(m+1)*sizeof(float));
+			for(int i=0;i<m+1;i++){
+				hst_y2c[i]=i;
+		 	}
+			bloque2c[w] = (int) ceil((float) (m+1) /hilos2c[w]);
 			cudaEventCreate(&start2c);
 			cudaEventCreate(&end2c);
 			cudaEventRecord(start2c,0);
@@ -44,9 +43,10 @@ int main(int argc, char** argv) {
 			cudaEventSynchronize(end2c);
 			cudaEventElapsedTime(&tiempoGPU2c,start2c,end2c);
 			printf("%f\n",tiempoGPU2c);
+			cudaFree(dev_e2c);
+			free(hst_y2c);
+
 	 	}
-		cudaFree(dev_e2c);
-		free(hst_y2c);
 	}
 	return 0; 
 } 
