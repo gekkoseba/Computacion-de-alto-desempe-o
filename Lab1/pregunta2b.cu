@@ -26,10 +26,6 @@ int main(int argc, char** argv) {
 		for(int i=0;i<m+1;i++){
 			hst_y2b[i]=i;
 	 	}
-	 	printf("%f y %f\n",hst_y2b[0],hst_y2b[m] );
-
-
-
 	 	cudaEventCreate(&start2b);
 		cudaEventCreate(&end2b);
 		cudaEventRecord(start2b,0);
@@ -39,7 +35,6 @@ int main(int argc, char** argv) {
 		for (int i=0;i<n+1;i++){
 			t_i2b = i/n;
 			GPUEuler2<<<bloque2b,hilos2b>>>(dev_e2b,t_i2b,1/n,m+1);
-			printf("%f\n", t_i2b);
 		}
 		cudaEventRecord(end2b,0);
 		cudaEventSynchronize(end2b);
