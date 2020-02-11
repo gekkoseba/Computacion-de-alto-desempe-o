@@ -28,6 +28,34 @@ void printAoS(struct AoS *array,int size){
 		printf("%d\n",array[i].down );
 	}
 }
+void checkMassAoS(struct AoS *array,int size){
+	int sum=0;
+	for (int i = 0; i < size; ++i)
+	{
+		sum+=array[i].up +array[i].left+array[i].right+array[i].down;
+	}
+	printf("%d\n",sum );
+}
+__global__ void collision_kernel_AoS(struct AoS *array,int size){
+	int myID = threadIdx.x + blockDim.x * blockIdx.x;
+	if (myID<size)
+	{
+		if (array[myID].up==1 && array[myID].down==1 && array[myID].right==0 && array[myID].left==0)
+		{
+			array[myID].up=0;
+			array[myID].down=0;
+			array[myID].left=1;
+			array[myID].right=1;
+		}
+		else if (array[myID].up==0 && array[myID].down==0 && array[myID].right==1 && array[myID].left==1)
+		{
+			array[myID].up=1;
+			array[myID].down=1;
+			array[myID].left=0;
+			array[myID].right=0;
+		}
+	}
+}
 void printSoA(struct SoA structure,int size){
 	for (int i = 0; i < size; ++i)
 	{
@@ -35,6 +63,34 @@ void printSoA(struct SoA structure,int size){
 		printf("%d ",structure.left[i] );
 		printf("%d ",structure.right[i] );
 		printf("%d\n",structure.down[i] );
+	}
+}
+void checkMassSoA(struct SoA structure,int size){
+	int sum=0;
+	for (int i = 0; i < size; ++i)
+	{
+		sum+=structure.up[i]+structure.left[i] +structure.right[i] +structure.down[i];
+	}
+	printf("%d\n",sum );
+}
+__global__ void collision_kernel_SoA(struct SoA structure,int size){
+	int myID = threadIdx.x + blockDim.x * blockIdx.x;
+	if (myID<size)
+	{
+		if (structure.up[myID]==1 && structure.down[myID]==1 && structure.right[myID]==0 && structure.left[myID]==0)
+		{
+			structure.up[myID]=0;
+			structure.down[myID]=0;
+			structure.left[myID]=1;
+			structure.right[myID]=1;
+		}
+		else if (structure.up[myID]==0 && structure.down[myID]==0 && structure.right[myID]==1 && structure.left[myID]==1)
+		{
+			structure.up[myID]=1;
+			structure.down[myID]=1;
+			structure.left[myID]=0;
+			structure.right[myID]=0;
+		}
 	}
 }
 void initSoA(){
@@ -65,7 +121,7 @@ void initSoA(){
 		fscanf (file, "%d", &structure.down[i]);
 	}
 	fclose (file);   
-	printSoA(structure,5);
+	checkMassSoA(structure,M*N);
 	return ;
 }
 void initAoS(){
@@ -92,7 +148,7 @@ void initAoS(){
 		fscanf (file, "%d", &array[i].down);
 	}
 	fclose (file);   
-	printAoS(array,5);
+	checkMassAoS(array,M*N);
 	return ;
 }
 
