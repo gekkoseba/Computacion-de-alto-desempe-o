@@ -4,21 +4,21 @@
 #include <stdlib.h>
 #include <cuda_runtime.h>
 
-
+//Arreglo de estructuras
 struct AoS{
 	int up;
 	int left;
 	int right;
 	int down;
 };
-
+//Estructura de arreglos
 struct SoA{
 	int* up;
 	int* left;
 	int* right;
 	int* down;
 };
-
+//Imprime arreglo de estructuras
 void printAoS(struct AoS *array,int size){
 	for (int i = 0; i < size; ++i)
 	{
@@ -28,6 +28,7 @@ void printAoS(struct AoS *array,int size){
 		printf("%d\n",array[i].down );
 	}
 }
+//imprime masa del sistema de arreglo de estructuras
 void checkMassAoS(struct AoS *array,int size){
 	int sum=0;
 	for (int i = 0; i < size; ++i)
@@ -36,6 +37,7 @@ void checkMassAoS(struct AoS *array,int size){
 	}
 	printf("%d\n",sum );
 }
+//Kernel de colision de arreglo de estructura
 __global__ void collision_kernel_AoS(struct AoS *array,int size){
 	int myID = threadIdx.x + blockDim.x * blockIdx.x;
 	if (myID<size)
@@ -56,12 +58,15 @@ __global__ void collision_kernel_AoS(struct AoS *array,int size){
 		}
 	}
 }
+//Hace todo para arreglo de estructuras
 void initAoS(){
+	//leer archivo
 	FILE* file = fopen ("a.txt", "r");
   	int N = 0;
   	int M = 0;
 	fscanf (file, "%d", &N);    
 	fscanf (file, "%d", &M);  
+	//crea y llena arreglo de estructuras
 	struct AoS* array =(struct AoS*) malloc(sizeof(struct AoS)*N*M);
 	for (int i = 0; i < N*M; ++i)
 	{
@@ -81,6 +86,7 @@ void initAoS(){
 	}
 	fclose (file);   
 	printAoS(array,M*N);
+	//inicia llamada a kernel de colision, ACA HAY ERROR
 	int block_size = 256;
 	int grid_size = (int)ceil((float)(N * M) / block_size);
 	struct AoS* gpuArray;
@@ -92,7 +98,7 @@ void initAoS(){
 	cudaFree(gpuArray);
 	return ;
 }
-
+//Imprime estructura de arreglo
 void printSoA(struct SoA structure,int size){
 	for (int i = 0; i < size; ++i)
 	{
@@ -102,6 +108,7 @@ void printSoA(struct SoA structure,int size){
 		printf("%d\n",structure.down[i] );
 	}
 }
+//imprime masa de sistema de estructura de arreglos
 void checkMassSoA(struct SoA structure,int size){
 	int sum=0;
 	for (int i = 0; i < size; ++i)
@@ -110,6 +117,7 @@ void checkMassSoA(struct SoA structure,int size){
 	}
 	printf("%d\n",sum );
 }
+//kernel de colision de estructura de arreglos
 __global__ void collision_kernel_SoA(struct SoA structure,int size){
 	int myID = threadIdx.x + blockDim.x * blockIdx.x;
 	if (myID<size)
@@ -130,12 +138,15 @@ __global__ void collision_kernel_SoA(struct SoA structure,int size){
 		}
 	}
 }
+//Hace todo para estructura de arreglos
 void initSoA(){
 	FILE* file = fopen ("initial.txt", "r");
   	int N = 0;
   	int M = 0;
+  	//Leer archivo
 	fscanf (file, "%d", &N);    
 	fscanf (file, "%d", &M);  
+	//Crea y llena estructura de arreglos
 	struct SoA structure;
 	structure.up =(int*) malloc(sizeof(int)*N*M); 
 	structure.down =(int*) malloc(sizeof(int)*N*M); 
@@ -159,6 +170,7 @@ void initSoA(){
 	}
 	fclose (file);   
 	checkMassSoA(structure,M*N);
+	//AUN NO EMPIEZO LAS LLAMADAS A LOS KERNEL, PRIMERO HARE EL AOS
 	return ;
 }
 
