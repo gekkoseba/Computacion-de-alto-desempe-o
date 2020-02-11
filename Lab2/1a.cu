@@ -22,9 +22,9 @@ struct SoA{
 void printAoS(struct AoS *array,int size){
 	for (int i = 0; i < size; ++i)
 	{
+		printf("%d ",array[i].right );
 		printf("%d ",array[i].up );
 		printf("%d ",array[i].left );
-		printf("%d ",array[i].right );
 		printf("%d\n",array[i].down );
 	}
 }
@@ -56,12 +56,49 @@ __global__ void collision_kernel_AoS(struct AoS *array,int size){
 		}
 	}
 }
+void initAoS(){
+	FILE* file = fopen ("a.txt", "r");
+  	int N = 0;
+  	int M = 0;
+	fscanf (file, "%d", &N);    
+	fscanf (file, "%d", &M);  
+	struct AoS* array =(struct AoS*) malloc(sizeof(struct AoS)*N*M);
+	for (int i = 0; i < N*M; ++i)
+	{
+		fscanf (file, "%d", &array[i].right);
+	}
+	for (int i = 0; i < N*M; ++i)
+	{
+		fscanf (file, "%d", &array[i].up);
+	}
+	for (int i = 0; i < N*M; ++i)
+	{
+		fscanf (file, "%d", &array[i].left);
+	}
+	for (int i = 0; i < N*M; ++i)
+	{
+		fscanf (file, "%d", &array[i].down);
+	}
+	fclose (file);   
+	printAoS(array,M*N);
+	int block_size = 256;
+	int grid_size = (int)ceil((float)(N * M) / block_size);
+	struct AoS* gpuArray;
+	cudaMalloc(&gpuArray, sizeof(struct AoS)*N*M);
+	cudaMemcpy(gpuArray,array,sizeof(struct AoS)*N*M,cudaMemcpyHostToDevice);
+	printAoS(gpuArray,M*N);
+	collision_kernel_AoS<<<grid_size,block_size>>>(gpuArray,M*N);
+	cudaMemcpy(array,gpuArray,sizeof(struct AoS)*N*M,cudaMemcpyDeviceToHost);
+	cudaFree(gpuArray);
+	return ;
+}
+
 void printSoA(struct SoA structure,int size){
 	for (int i = 0; i < size; ++i)
 	{
+		printf("%d ",structure.right[i] );
 		printf("%d ",structure.up[i] );
 		printf("%d ",structure.left[i] );
-		printf("%d ",structure.right[i] );
 		printf("%d\n",structure.down[i] );
 	}
 }
@@ -124,37 +161,9 @@ void initSoA(){
 	checkMassSoA(structure,M*N);
 	return ;
 }
-void initAoS(){
-	FILE* file = fopen ("initial.txt", "r");
-  	int N = 0;
-  	int M = 0;
-	fscanf (file, "%d", &N);    
-	fscanf (file, "%d", &M);  
-	struct AoS* array =(struct AoS*) malloc(sizeof(struct AoS)*N*M);
-	for (int i = 0; i < N*M; ++i)
-	{
-		fscanf (file, "%d", &array[i].right);
-	}
-	for (int i = 0; i < N*M; ++i)
-	{
-		fscanf (file, "%d", &array[i].up);
-	}
-	for (int i = 0; i < N*M; ++i)
-	{
-		fscanf (file, "%d", &array[i].left);
-	}
-	for (int i = 0; i < N*M; ++i)
-	{
-		fscanf (file, "%d", &array[i].down);
-	}
-	fclose (file);   
-	checkMassAoS(array,M*N);
-	return ;
-}
 
 int main()
 {
 	initAoS();
-	initSoA();
 	return 0;
 }
