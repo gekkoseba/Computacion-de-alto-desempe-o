@@ -19,44 +19,42 @@ struct SoA{
 	int* down;
 };
 //Imprime arreglo de estructuras
-void printAoS(int* array,int size){
+void printAoS(struct AoS *array,int size){
 	for (int i = 0; i < size; ++i)
 	{
-		printf("%d ",array[i*4] );
-		printf("%d ",array[i*4+1] );
-		printf("%d ",array[i*4+2] );
-		printf("%d\n",array[i*4+3] );
+		printf("%d ",array[i].right );
+		printf("%d ",array[i].up );
+		printf("%d ",array[i].left );
+		printf("%d\n",array[i].down );
 	}
 }
 //imprime masa del sistema de arreglo de estructuras
-void checkMassAoS(int *array,int size){
+void checkMassAoS(struct AoS *array,int size){
 	int sum=0;
 	for (int i = 0; i < size; ++i)
 	{
-		sum+=array[i*4] +array[i*4+2]+array[i*4+3]+array[i*4+1];
+		sum+=array[i].up +array[i].left+array[i].right+array[i].down;
 	}
 	printf("%d\n",sum );
 }
 //Kernel de colision de arreglo de estructura
-__global__ void collision_kernel_AoS(int *array,int size){
+__global__ void collision_kernel_AoS(struct AoS *array,int size){
 	int myID = threadIdx.x + blockDim.x * blockIdx.x;
-	printf("ho\n");
 	if (myID<size)
 	{
-		printf("la\n");
-		if (array[myID*4]==1 && array[myID*4+1]==1 && array[myID*4+3]==0 && array[myID*4+2]==0)
+		if (array[myID].up==1 && array[myID].down==1 && array[myID].right==0 && array[myID].left==0)
 		{
-			array[myID*4]=0;
-			array[myID*4+1]=0;
-			array[myID*4+2]=1;
-			array[myID*4+3]=1;
+			array[myID].up=0;
+			array[myID].down=0;
+			array[myID].left=1;
+			array[myID].right=1;
 		}
-		else if (array[myID*4]==0 && array[myID*4+1]==0 && array[myID*4+3]==1 && array[myID*4+2]==1)
+		else if (array[myID].up==0 && array[myID].down==0 && array[myID].right==1 && array[myID].left==1)
 		{
-			array[myID*4]=1;
-			array[myID*4+1]=1;
-			array[myID*4+2]=0;
-			array[myID*4+3]=0;
+			array[myID].up=1;
+			array[myID].down=1;
+			array[myID].left=0;
+			array[myID].right=0;
 		}
 	}
 }
@@ -69,36 +67,36 @@ void initAoS(){
 	fscanf (file, "%d", &N);    
 	fscanf (file, "%d", &M);  
 	//crea y llena arreglo de estructuras
-	int* array =(int*) malloc(sizeof(int)*N*M*4);
+	struct AoS* array =(struct AoS*) malloc(sizeof(struct AoS)*N*M);
 	for (int i = 0; i < N*M; ++i)
 	{
-		fscanf (file, "%d", &array[i*4+3]);
+		fscanf (file, "%d", &array[i].right);
 	}
 	for (int i = 0; i < N*M; ++i)
 	{
-		fscanf (file, "%d", &array[i*4]);
+		fscanf (file, "%d", &array[i].up);
 	}
 	for (int i = 0; i < N*M; ++i)
 	{
-		fscanf (file, "%d", &array[i*4+2]);
+		fscanf (file, "%d", &array[i].left);
 	}
 	for (int i = 0; i < N*M; ++i)
 	{
-		fscanf (file, "%d", &array[i*4+1]);
+		fscanf (file, "%d", &array[i].down);
 	}
 	fclose (file);   
 	printAoS(array,M*N);
 	//inicia llamada a kernel de colision, ACA HAY ERROR
 	int block_size = 256;
-	int grid_size = (int)ceil((float)(N * M*4) / block_size);
-	int* gpuArray;
-	int* array2 =(int*)malloc(sizeof(int)*N*M*4);
-	cudaMalloc(&gpuArray, sizeof(int)*N*M*4);
-	cudaMemcpy(gpuArray,array,sizeof(int)*N*M*4,cudaMemcpyHostToDevice);
+	int grid_size = (int)ceil((float)(N * M) / block_size);
+	struct AoS* gpuArray;
+	struct AoS* array2 =(struct AoS*) malloc(sizeof(struct AoS)*N*M);
+	cudaMalloc(&gpuArray, sizeof(struct AoS)*N*M);
+	cudaMemcpy(gpuArray,array,sizeof(struct AoS)*N*M,cudaMemcpyHostToDevice);
 	collision_kernel_AoS<<<1,1>>>(gpuArray,M*N);
 	cudaDeviceSynchronize();
 	//collision_kernel_AoS<<<grid_size,block_size>>>(gpuArray,M*N);
-	cudaMemcpy(array2,gpuArray,sizeof(int)*N*M*4,cudaMemcpyDeviceToHost);
+	cudaMemcpy(array2,gpuArray,sizeof(struct AoS)*N*M,cudaMemcpyDeviceToHost);
 	cudaFree(gpuArray);
 	printAoS(array2,M*N);
 	return ;
